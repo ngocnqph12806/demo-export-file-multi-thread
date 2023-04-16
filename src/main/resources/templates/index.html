@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<button onclick="exportFile()">Export</button>
+<script>
+    function exportFile() {
+        console.log("a");
+        fetch('http://localhost:8080/export/export', {
+            method: 'GET',
+        })
+            .then(response => {
+                // Kiểm tra xem phản hồi trả về có thành công hay không
+                if (!response.ok) {
+                    throw new Error('Có lỗi xảy ra khi tải file');
+                }
+
+                // Lấy thông tin về file từ phản hồi trả về
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                const filename = filenameMatch ? filenameMatch[1] : 'unknown.xlsx';
+                console.log("b")
+                // Tạo một blob object từ phản hồi trả về
+                response.blob().then(blob => {
+                    // Tạo một URL để tải file
+                    const url = window.URL.createObjectURL(blob);
+
+                    // Tạo một link để tải file
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', filename);
+                    console.log("c")
+
+                    // Thêm link vào DOM và kích hoạt sự kiện click để tải file
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                });
+            })
+            .catch(error => {
+                console.error('Có lỗi xảy ra khi tải file:', error);
+            });
+    }
+</script>
+</body>
+</html>
